@@ -1,0 +1,9 @@
+.git
+.idea
+.github
+*.md
+postman/
+cmd/
+**/__debug_bin*
+**/*.exe
+**/*.test

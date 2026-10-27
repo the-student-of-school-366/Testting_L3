@@ -16,6 +16,9 @@
 ├── tests/
 │   └── e2e/                    # автотесты ДЗ (Playground + GraphQL Echo)
 ├── postman/                    # коллекция с GraphQL subscription (SSE)
+├── Dockerfile                  # образ для запуска API-автотестов
+├── .dockerignore
+├── .github/workflows/ci.yml    # CI: docker build + docker run
 ├── go.mod
 └── README.md
 ```
@@ -61,7 +64,7 @@ go run ./cmd/server
 Логин Playground: `Bret` / `Password@123`  
 (в семинаре был `password123`; в актуальном OpenAPI — `Password@123`).
 
-### Запуск тестов
+### Запуск тестов локально (без Docker)
 
 Все тесты (локальные handler + e2e):
 
@@ -82,3 +85,27 @@ go test ./internal/... -count=1
 ```
 
 Нужен интернет для `tests/e2e`.
+
+## Docker: сборка и запуск API-автотестов
+
+Образ содержит Go и исходники e2e-тестов. При `docker run` тесты запускаются автоматически (`go test ./tests/e2e`), ходят в публичные API выше. Exit code контейнера = результат тестов (0 — успех, иначе — падение).
+
+Сборка image:
+
+```bash
+docker build -t api-test .
+```
+
+Запуск тестов в контейнере:
+
+```bash
+docker run --rm api-test
+```
+
+## CI / CD
+
+Конфигурация: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+
+Pipeline запускается на **push** и **pull_request** и выполняет цепочку:
+
+`checkout` → `docker build -t api-test .` → `docker run --rm api-test`
